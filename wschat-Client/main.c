@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <winsock2.h>
 #include <string.h>
+#include <stdlib.h>
 
 void ErrorHandling(char* message);
+void removeEnter(char* str);
 
 int main(int argc, char* argv[]) {
 
@@ -10,8 +12,8 @@ int main(int argc, char* argv[]) {
 	SOCKET hSocket;
 	SOCKADDR_IN servAddr;
 
-	char message[30];
-	int strLen;
+	char msg[30];
+	int strlen;
 
 	if (argc != 3) {
 		printf("Usage: %s <IP> <port>\n", argv[0]); // 실행시 IP, Port 입력 필요
@@ -35,15 +37,32 @@ int main(int argc, char* argv[]) {
 
 	printf("클라이언트가 [ip: %s], [port: %s] 에 연결됨\n", argv[1], argv[2]);
 
-	strLen = recv(hSocket, message, sizeof(message), 0);
-	if (strLen == -1)
+	strlen = recv(hSocket, msg, sizeof(msg), 0);
+	if (strlen == -1)
 		ErrorHandling("recv() error!");
-	printf("Message from server: %s \n", message);
+	printf("%s \n", msg);
 
+	while (1) {
+		
+		printf("나: ");
+		rewind(stdin);
+		fgets(msg, sizeof(msg), stdin);
+		removeEnter(msg);
+		send(hSocket, msg, sizeof(msg), 0);
+
+		if (strcmp(msg, "quit") == 0)
+			break;
+	}
+
+	printf("연결을 종료합니다.\n");
 	closesocket(hSocket);
 	WSACleanup();
 
 	return 0;
+}
+
+void removeEnter(char* str) {
+	str[strlen(str) - 1] = '\0';
 }
 
 void ErrorHandling(char* message) {
