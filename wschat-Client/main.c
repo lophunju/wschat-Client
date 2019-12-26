@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	SOCKET hSocket;
 	SOCKADDR_IN servAddr;
 
-	char msg[30];
+	char msg[50];
 	int strlen;
 
 	if (argc != 3) {
@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
+	//연결부
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 		ErrorHandling("WSAStartup() error!");
 
@@ -42,8 +43,9 @@ int main(int argc, char* argv[]) {
 		ErrorHandling("recv() error!");
 	printf("%s \n", msg);
 
+	//대화시작
 	while (1) {
-		
+		//보내기
 		printf("나: ");
 		rewind(stdin);
 		fgets(msg, sizeof(msg), stdin);
@@ -52,8 +54,18 @@ int main(int argc, char* argv[]) {
 
 		if (strcmp(msg, "quit") == 0)
 			break;
+
+		//받기
+		strlen = recv(hSocket, msg, sizeof(msg), 0);
+		if (strlen == -1)
+			printf("상대방으로부터 메세지가 정상적으로 수신되지 않았습니다.\n");
+		else if (strcmp(msg, "quit") == 0)
+			break;
+		else
+			printf("상대방: %s \n", msg);
 	}
 
+	//연결 해제부
 	printf("연결을 종료합니다.\n");
 	closesocket(hSocket);
 	WSACleanup();
